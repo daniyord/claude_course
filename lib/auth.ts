@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 
 export const auth = betterAuth({
@@ -17,4 +18,12 @@ export async function getSession() {
 export async function getCurrentUser() {
   const session = await getSession();
   return session?.user ?? null;
+}
+
+export async function requireUser() {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/authenticate");
+  }
+  return user;
 }
