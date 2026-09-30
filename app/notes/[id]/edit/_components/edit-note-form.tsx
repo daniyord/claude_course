@@ -4,19 +4,23 @@ import { useActionState, useRef } from "react";
 import Link from "next/link";
 import type { JSONContent } from "@tiptap/react";
 import NoteEditor from "@/app/_components/note-editor";
-import { createNoteAction, type NewNoteState } from "../actions";
+import { updateNoteAction, type EditNoteState } from "../../actions";
 
-const initialState: NewNoteState = { error: null };
+type EditNoteFormProps = {
+  noteId: string;
+  title: string;
+  content: JSONContent;
+};
 
-export default function NewNoteForm() {
-  // The document never affects rendering, so it lives in a ref rather than
-  // state: typing doesn't re-render the form, and it's read once on submit.
-  const contentRef = useRef<JSONContent | null>(null);
+const initialState: EditNoteState = { error: null };
+
+export default function EditNoteForm({ noteId, title, content }: EditNoteFormProps) {
+  const contentRef = useRef<JSONContent>(content);
 
   const [state, formAction, isPending] = useActionState(
-    (prevState: NewNoteState, formData: FormData) => {
-      formData.set("content", JSON.stringify(contentRef.current ?? { type: "doc" }));
-      return createNoteAction(prevState, formData);
+    (prevState: EditNoteState, formData: FormData) => {
+      formData.set("content", JSON.stringify(contentRef.current));
+      return updateNoteAction(noteId, prevState, formData);
     },
     initialState,
   );
@@ -30,8 +34,7 @@ export default function NewNoteForm() {
           name="title"
           required
           maxLength={200}
-          autoFocus
-          placeholder="Untitled note"
+          defaultValue={title}
           className="rounded-md border border-foreground/20 bg-background px-3 py-2 text-base font-normal focus-visible:border-foreground/50 focus-visible:outline-none"
         />
       </label>
@@ -41,6 +44,7 @@ export default function NewNoteForm() {
           Content
         </span>
         <NoteEditor
+          content={content}
           onChange={(json) => {
             contentRef.current = json;
           }}
@@ -56,7 +60,7 @@ export default function NewNoteForm() {
 
       <div className="flex items-center justify-end gap-3">
         <Link
-          href="/dashboard"
+          href={`/notes/${noteId}`}
           className="rounded-md border border-foreground/20 px-4 py-2 text-sm font-medium hover:bg-foreground/5"
         >
           Cancel
@@ -66,7 +70,7 @@ export default function NewNoteForm() {
           disabled={isPending}
           className="rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {isPending ? "Saving…" : "Save note"}
+          {isPending ? "Saving…" : "Save changes"}
         </button>
       </div>
     </form>

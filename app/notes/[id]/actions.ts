@@ -1,19 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { noteInputSchema } from "@/lib/note-schema";
-import { createNote } from "@/lib/notes";
+import { deleteNote, updateNote } from "@/lib/notes";
 
-export type NewNoteState = { error: string | null };
+export type EditNoteState = { error: string | null };
 
 const GENERIC_SAVE_ERROR = "We couldn't save your note right now. Please try again in a moment.";
 
-export async function createNoteAction(
-  _prevState: NewNoteState,
+export async function updateNoteAction(
+  noteId: string,
+  _prevState: EditNoteState,
   formData: FormData,
-): Promise<NewNoteState> {
+): Promise<EditNoteState> {
   const user = await requireUser();
 
   const parsed = noteInputSchema.safeParse({
@@ -25,16 +26,26 @@ export async function createNoteAction(
     return { error: parsed.error.issues[0]?.message ?? GENERIC_SAVE_ERROR };
   }
 
+  let updated: boolean;
   try {
-    await createNote(user.id, {
+    updated = await updateNote(user.id, noteId, {
       title: parsed.data.title,
       contentJson: JSON.stringify(parsed.data.content),
     });
   } catch (error) {
-    console.error("Failed to create note", { userId: user.id, error });
+    console.error("Failed to update note", { userId: user.id, noteId, error });
     return { error: GENERIC_SAVE_ERROR };
   }
+  if (!updated) notFound();
 
+  revalidatePath("/dashboard");
+  revalidatePath(`/notes/${noteId}`);
+  redirect(`/notes/${noteId}`);
+}
+
+export async function deleteNoteAction(noteId: string): Promise<void> {
+  const user = await requireUser();
+  await deleteNote(user.id, noteId);
   revalidatePath("/dashboard");
   redirect("/dashboard");
 }

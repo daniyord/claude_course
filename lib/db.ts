@@ -87,6 +87,6 @@ export function get<T>(sql: string, params: SQLQueryBindings[] = []): T | undefi
   return db.query(sql).get(...params) as T | undefined;
 }
 
-export function run(sql: string, params: SQLQueryBindings[] = []): void {
-  db.query(sql).run(...params);
+export function run(sql: string, params: SQLQueryBindings[] = []): number {
+  return db.query(sql).run(...params).changes;
 }

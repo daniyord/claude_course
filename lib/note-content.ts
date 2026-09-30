@@ -54,3 +54,11 @@ export function sanitizeNoteContent(raw: unknown): JSONContent {
     throw new InvalidNoteContentError("Invalid note content");
   }
 }
+
+export function parseNoteContent(contentJson: string): JSONContent {
+  try {
+    return JSON.parse(contentJson) as JSONContent;
+  } catch {
+    return { type: "doc", content: [] };
+  }
+}

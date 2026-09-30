@@ -179,18 +179,26 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
       ),
   });
 
+  // Derived during render rather than synced into state: if the remembered
+  // button becomes disabled, the tab stop falls back to the first enabled one
+  // so the toolbar always stays reachable with Tab.
+  const enabledIndexes = allTools.flatMap((tool, index) => (state[tool.id].enabled ? [index] : []));
+  const tabStopIndex = enabledIndexes.includes(focusIndex) ? focusIndex : (enabledIndexes[0] ?? -1);
+
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
-    const last = allTools.length - 1;
-    const next = {
-      ArrowRight: focusIndex === last ? 0 : focusIndex + 1,
-      ArrowLeft: focusIndex === 0 ? last : focusIndex - 1,
+    if (enabledIndexes.length === 0) return;
+    const position = Math.max(enabledIndexes.indexOf(tabStopIndex), 0);
+    const last = enabledIndexes.length - 1;
+    const nextPosition = {
+      ArrowRight: position === last ? 0 : position + 1,
+      ArrowLeft: position === 0 ? last : position - 1,
       Home: 0,
       End: last,
     }[event.key];
-    if (next === undefined) return;
+    if (nextPosition === undefined) return;
     event.preventDefault();
-    setFocusIndex(next);
-    buttonRefs.current[next]?.focus();
+    // focusIndex is updated by the button's onFocus handler.
+    buttonRefs.current[enabledIndexes[nextPosition]]?.focus();
   }
 
   return (
@@ -216,7 +224,7 @@ export default function EditorToolbar({ editor }: EditorToolbarProps) {
                   buttonRefs.current[buttonIndex] = node;
                 }}
                 type="button"
-                tabIndex={buttonIndex === focusIndex ? 0 : -1}
+                tabIndex={buttonIndex === tabStopIndex ? 0 : -1}
                 onFocus={() => setFocusIndex(buttonIndex)}
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => tool.run(editor)}
