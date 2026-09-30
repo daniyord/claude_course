@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { nextCookies } from "better-auth/next-js";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
@@ -9,7 +10,10 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  plugins: [nextCookies()],
 });
+
+export type User = typeof auth.$Infer.Session.user;
 
 export async function getSession() {
   return auth.api.getSession({ headers: await headers() });

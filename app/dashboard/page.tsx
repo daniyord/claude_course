@@ -6,7 +6,7 @@ export default async function DashboardPage() {
   const user = await requireUser();
   return (
     <div className="min-h-screen">
-      <Header userEmail={user.email} />
+      <Header user={user} />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <div className="flex items-center justify-between gap-4">
           <h1 className="text-2xl font-semibold tracking-tight">Your notes</h1>
