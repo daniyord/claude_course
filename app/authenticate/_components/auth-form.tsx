@@ -64,6 +64,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
             type="text"
             name="name"
             required
+            maxLength={100}
+            autoComplete="name"
             className="rounded-md border border-foreground/20 bg-background px-3 py-2"
           />
         </label>

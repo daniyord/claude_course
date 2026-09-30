@@ -1,7 +1,7 @@
 "use client";
 
 import { EditorContent, useEditor, type JSONContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
+import { editorExtensions } from "@/lib/editor-extensions";
 import EditorToolbar from "./editor-toolbar";
 
 type NoteEditorProps = {
@@ -24,16 +24,7 @@ const contentClassName = [
 
 export default function NoteEditor({ content, onChange, labelId }: NoteEditorProps) {
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: [1, 2, 3] },
-        blockquote: false,
-        orderedList: false,
-        strike: false,
-        link: false,
-        underline: false,
-      }),
-    ],
+    extensions: editorExtensions,
     content,
     immediatelyRender: false,
     editorProps: {
