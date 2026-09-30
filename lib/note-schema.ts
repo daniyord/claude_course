@@ -26,3 +26,11 @@ export const noteInputSchema = z.object({
     }),
   isPublic: z.boolean(),
 });
+
+export function parseNoteFormData(formData: FormData) {
+  return noteInputSchema.safeParse({
+    title: formData.get('title') ?? '',
+    content: formData.get('content') ?? '',
+    isPublic: formData.get('isPublic') === 'on',
+  });
+}

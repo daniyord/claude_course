@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { notFound, redirect } from 'next/navigation';
 import { requireUser } from '@/lib/auth';
-import { noteInputSchema } from '@/lib/note-schema';
+import { parseNoteFormData } from '@/lib/note-schema';
 import { deleteNote, updateNote } from '@/lib/notes';
 
 export type EditNoteState = { error: string | null };
@@ -17,11 +17,7 @@ export async function updateNoteAction(
 ): Promise<EditNoteState> {
   const user = await requireUser();
 
-  const parsed = noteInputSchema.safeParse({
-    title: formData.get('title') ?? '',
-    content: formData.get('content') ?? '',
-    isPublic: formData.get('isPublic') === 'on',
-  });
+  const parsed = parseNoteFormData(formData);
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? GENERIC_SAVE_ERROR };

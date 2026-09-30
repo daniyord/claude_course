@@ -2,11 +2,8 @@ import { betterAuth } from 'better-auth';
 import { nextCookies } from 'better-auth/next-js';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { APIError } from 'better-auth/api';
 import { db } from '@/lib/db';
-import { sanitizeLine } from '@/lib/sanitize';
-
-const MAX_NAME_LENGTH = 100;
+import { cleanUserName } from '@/lib/user-name';
 
 export const auth = betterAuth({
   database: db,
@@ -29,17 +26,6 @@ export const auth = betterAuth({
   },
   plugins: [nextCookies()],
 });
-
-function cleanUserName(name: unknown): string {
-  const cleaned = typeof name === 'string' ? sanitizeLine(name) : '';
-  if (cleaned.length < 1 || cleaned.length > MAX_NAME_LENGTH) {
-    throw new APIError('BAD_REQUEST', {
-      code: 'INVALID_NAME',
-      message: `Name must be between 1 and ${MAX_NAME_LENGTH} characters`,
-    });
-  }
-  return cleaned;
-}
 
 export type User = typeof auth.$Infer.Session.user;
 
