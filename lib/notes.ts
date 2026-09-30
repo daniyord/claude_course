@@ -1,4 +1,4 @@
-import { run } from "@/lib/db";
+import { query, run } from "@/lib/db";
 
 export type Note = {
   id: string;
@@ -36,4 +36,30 @@ export async function createNote(
   );
 
   return note;
+}
+
+export type NoteSummary = Pick<Note, "id" | "title" | "isPublic" | "updatedAt">;
+
+type NoteSummaryRow = {
+  id: string;
+  title: string;
+  is_public: number;
+  updated_at: string;
+};
+
+export async function getNotesByUser(userId: string): Promise<NoteSummary[]> {
+  const rows = query<NoteSummaryRow>(
+    `SELECT id, title, is_public, updated_at
+     FROM notes
+     WHERE user_id = ?
+     ORDER BY updated_at DESC`,
+    [userId],
+  );
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    isPublic: row.is_public === 1,
+    updatedAt: row.updated_at,
+  }));
 }
