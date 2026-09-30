@@ -14,6 +14,36 @@ type AuthFormProps = {
 
 const initialState: AuthFormState = { error: null };
 
+// Only known, user-actionable codes are shown; anything else falls back to a
+// generic message so server internals never reach the UI.
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  INVALID_EMAIL_OR_PASSWORD: "That email and password combination didn't work. Please try again.",
+  INVALID_EMAIL: "Please enter a valid email address.",
+  INVALID_PASSWORD: "Please enter your password.",
+  PASSWORD_TOO_SHORT: "Your password must be at least 8 characters.",
+  PASSWORD_TOO_LONG: "Your password must be 128 characters or fewer.",
+  INVALID_NAME: "Please enter a name between 1 and 100 characters.",
+  USER_ALREADY_EXISTS:
+    "We couldn't create an account with these details. If you already have an account, try logging in.",
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
+    "We couldn't create an account with these details. If you already have an account, try logging in.",
+};
+
+function toFriendlyAuthError(
+  error: { code?: string; status?: number },
+  mode: AuthMode,
+): string {
+  if (error.status === 429) {
+    return "Too many attempts. Please wait a moment and try again.";
+  }
+  if (error.code && AUTH_ERROR_MESSAGES[error.code]) {
+    return AUTH_ERROR_MESSAGES[error.code];
+  }
+  return mode === "register"
+    ? "We couldn't create your account right now. Please try again."
+    : "We couldn't log you in right now. Please try again.";
+}
+
 export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
 
@@ -24,17 +54,21 @@ export default function AuthForm({ mode }: AuthFormProps) {
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
 
-    const { error } =
-      mode === "register"
-        ? await authClient.signUp.email({
-            name: String(formData.get("name")),
-            email,
-            password,
-          })
-        : await authClient.signIn.email({ email, password });
+    try {
+      const { error } =
+        mode === "register"
+          ? await authClient.signUp.email({
+              name: String(formData.get("name")),
+              email,
+              password,
+            })
+          : await authClient.signIn.email({ email, password });
 
-    if (error) {
-      return { error: error.message ?? "Something went wrong" };
+      if (error) {
+        return { error: toFriendlyAuthError(error, mode) };
+      }
+    } catch {
+      return { error: "We couldn't reach the server. Check your connection and try again." };
     }
 
     router.push("/dashboard");
