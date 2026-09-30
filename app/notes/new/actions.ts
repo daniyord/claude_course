@@ -19,6 +19,7 @@ export async function createNoteAction(
   const parsed = noteInputSchema.safeParse({
     title: formData.get('title') ?? '',
     content: formData.get('content') ?? '',
+    isPublic: formData.get('isPublic') === 'on',
   });
 
   if (!parsed.success) {
@@ -29,6 +30,7 @@ export async function createNoteAction(
     await createNote(user.id, {
       title: parsed.data.title,
       contentJson: JSON.stringify(parsed.data.content),
+      isPublic: parsed.data.isPublic,
     });
   } catch (error) {
     console.error('Failed to create note', { userId: user.id, error });

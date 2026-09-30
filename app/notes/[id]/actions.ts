@@ -20,6 +20,7 @@ export async function updateNoteAction(
   const parsed = noteInputSchema.safeParse({
     title: formData.get('title') ?? '',
     content: formData.get('content') ?? '',
+    isPublic: formData.get('isPublic') === 'on',
   });
 
   if (!parsed.success) {
@@ -31,6 +32,7 @@ export async function updateNoteAction(
     updated = await updateNote(user.id, noteId, {
       title: parsed.data.title,
       contentJson: JSON.stringify(parsed.data.content),
+      isPublic: parsed.data.isPublic,
     });
   } catch (error) {
     console.error('Failed to update note', { userId: user.id, noteId, error });

@@ -10,11 +10,12 @@ type EditNoteFormProps = {
   noteId: string;
   title: string;
   content: JSONContent;
+  isPublic: boolean;
 };
 
 const initialState: EditNoteState = { error: null };
 
-export default function EditNoteForm({ noteId, title, content }: EditNoteFormProps) {
+export default function EditNoteForm({ noteId, title, content, isPublic }: EditNoteFormProps) {
   const contentRef = useRef<JSONContent>(content);
 
   const [state, formAction, isPending] = useActionState(
@@ -51,6 +52,11 @@ export default function EditNoteForm({ noteId, title, content }: EditNoteFormPro
           labelId='note-content-label'
         />
       </div>
+
+      <label className='flex items-center gap-2 text-sm font-medium'>
+        <input type='checkbox' name='isPublic' defaultChecked={isPublic} className='size-4' />
+        Share publicly (anyone with the link can view)
+      </label>
 
       {state.error && (
         <p role='alert' className='text-sm text-red-600'>

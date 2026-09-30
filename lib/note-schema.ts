@@ -26,4 +26,5 @@ export const noteInputSchema = z.object({
         return z.NEVER;
       }
     }),
+  isPublic: z.boolean(),
 });

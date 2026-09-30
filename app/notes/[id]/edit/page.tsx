@@ -20,6 +20,7 @@ export default async function EditNotePage(props: PageProps<'/notes/[id]/edit'>)
           noteId={note.id}
           title={note.title}
           content={parseNoteContent(note.contentJson)}
+          isPublic={note.isPublic}
         />
       </main>
     </div>

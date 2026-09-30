@@ -48,6 +48,11 @@ export default function NewNoteForm() {
         />
       </div>
 
+      <label className='flex items-center gap-2 text-sm font-medium'>
+        <input type='checkbox' name='isPublic' className='size-4' />
+        Share publicly (anyone with the link can view)
+      </label>
+
       {state.error && (
         <p role='alert' className='text-sm text-red-600'>
           {state.error}

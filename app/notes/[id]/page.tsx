@@ -5,6 +5,7 @@ import { parseNoteContent } from '@/lib/note-content';
 import { getNoteById } from '@/lib/notes';
 import Header from '../../_components/header';
 import NoteRenderer from '../../_components/note-renderer';
+import CopyLinkButton from './_components/copy-link-button';
 import DeleteNoteButton from './_components/delete-note-button';
 
 const dateFormatter = new Intl.DateTimeFormat('en', {
@@ -55,6 +56,15 @@ export default async function NotePage(props: PageProps<'/notes/[id]'>) {
                 </span>
               )}
             </p>
+            {note.publicSlug && (
+              <p className='mt-2 flex flex-wrap items-center gap-2 text-sm text-foreground/60'>
+                Shared at{' '}
+                <Link href={`/p/${note.publicSlug}`} className='break-all underline'>
+                  /p/{note.publicSlug}
+                </Link>
+                <CopyLinkButton path={`/p/${note.publicSlug}`} />
+              </p>
+            )}
           </header>
           <NoteRenderer content={parseNoteContent(note.contentJson)} />
         </article>
