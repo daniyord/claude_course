@@ -1,6 +1,6 @@
-import { getSchema, type JSONContent } from "@tiptap/core";
-import { editorExtensions, HEADING_LEVELS } from "@/lib/editor-extensions";
-import { sanitizeMultiline } from "@/lib/sanitize";
+import { getSchema, type JSONContent } from '@tiptap/core';
+import { editorExtensions, HEADING_LEVELS } from '@/lib/editor-extensions';
+import { sanitizeMultiline } from '@/lib/sanitize';
 
 const schema = getSchema(editorExtensions);
 
@@ -9,18 +9,18 @@ const CODE_LANGUAGE = /^[a-z0-9+#.-]{1,32}$/i;
 export class InvalidNoteContentError extends Error {}
 
 function cleanNode(node: JSONContent): JSONContent | null {
-  if (node.type === "text") {
-    const text = sanitizeMultiline(node.text ?? "");
+  if (node.type === 'text') {
+    const text = sanitizeMultiline(node.text ?? '');
     return text ? { ...node, text } : null;
   }
 
   const attrs = node.attrs ? { ...node.attrs } : undefined;
-  if (node.type === "heading" && !HEADING_LEVELS.includes(Number(attrs?.level))) {
-    throw new InvalidNoteContentError("Invalid heading level");
+  if (node.type === 'heading' && !HEADING_LEVELS.includes(Number(attrs?.level))) {
+    throw new InvalidNoteContentError('Invalid heading level');
   }
-  if (node.type === "codeBlock" && attrs) {
+  if (node.type === 'codeBlock' && attrs) {
     const language = attrs.language;
-    attrs.language = typeof language === "string" && CODE_LANGUAGE.test(language) ? language : null;
+    attrs.language = typeof language === 'string' && CODE_LANGUAGE.test(language) ? language : null;
   }
 
   const content = node.content
@@ -38,20 +38,20 @@ function cleanNode(node: JSONContent): JSONContent | null {
 export function sanitizeNoteContent(raw: unknown): JSONContent {
   try {
     const doc = raw as JSONContent;
-    if (doc?.type === "doc" && !doc.content?.length) {
+    if (doc?.type === 'doc' && !doc.content?.length) {
       return schema.topNodeType.createAndFill()!.toJSON() as JSONContent;
     }
 
     const parsed = schema.nodeFromJSON(raw);
     parsed.check();
-    if (parsed.type.name !== "doc") throw new Error("Root must be a doc");
+    if (parsed.type.name !== 'doc') throw new Error('Root must be a doc');
 
     const cleaned = cleanNode(parsed.toJSON() as JSONContent);
     const node = schema.nodeFromJSON(cleaned);
     node.check();
     return node.toJSON() as JSONContent;
   } catch {
-    throw new InvalidNoteContentError("Invalid note content");
+    throw new InvalidNoteContentError('Invalid note content');
   }
 }
 
@@ -59,6 +59,6 @@ export function parseNoteContent(contentJson: string): JSONContent {
   try {
     return JSON.parse(contentJson) as JSONContent;
   } catch {
-    return { type: "doc", content: [] };
+    return { type: 'doc', content: [] };
   }
 }

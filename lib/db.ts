@@ -1,13 +1,13 @@
-import { Database, type SQLQueryBindings } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import { Database, type SQLQueryBindings } from 'bun:sqlite';
+import { mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 
-const dbPath = process.env.DB_PATH || "data/app.db";
+const dbPath = process.env.DB_PATH || 'data/app.db';
 mkdirSync(dirname(dbPath), { recursive: true });
 
 export const db = new Database(dbPath, { create: true });
 
-db.exec("PRAGMA journal_mode = WAL;");
+db.exec('PRAGMA journal_mode = WAL;');
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS user (

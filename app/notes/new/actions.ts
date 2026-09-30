@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth";
-import { noteInputSchema } from "@/lib/note-schema";
-import { createNote } from "@/lib/notes";
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
+import { requireUser } from '@/lib/auth';
+import { noteInputSchema } from '@/lib/note-schema';
+import { createNote } from '@/lib/notes';
 
 export type NewNoteState = { error: string | null };
 
@@ -17,8 +17,8 @@ export async function createNoteAction(
   const user = await requireUser();
 
   const parsed = noteInputSchema.safeParse({
-    title: formData.get("title") ?? "",
-    content: formData.get("content") ?? "",
+    title: formData.get('title') ?? '',
+    content: formData.get('content') ?? '',
   });
 
   if (!parsed.success) {
@@ -31,10 +31,10 @@ export async function createNoteAction(
       contentJson: JSON.stringify(parsed.data.content),
     });
   } catch (error) {
-    console.error("Failed to create note", { userId: user.id, error });
+    console.error('Failed to create note', { userId: user.id, error });
     return { error: GENERIC_SAVE_ERROR };
   }
 
-  revalidatePath("/dashboard");
-  redirect("/dashboard");
+  revalidatePath('/dashboard');
+  redirect('/dashboard');
 }

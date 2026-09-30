@@ -1,4 +1,4 @@
-import StarterKit from "@tiptap/starter-kit";
+import StarterKit from '@tiptap/starter-kit';
 
 // Shared by the client editor and server-side content validation, so both
 // accept exactly the same document schema.

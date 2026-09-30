@@ -1,4 +1,4 @@
-import { get, query, run } from "@/lib/db";
+import { get, query, run } from '@/lib/db';
 
 export type Note = {
   id: string;
@@ -11,7 +11,7 @@ export type Note = {
   updatedAt: string;
 };
 
-const EMPTY_DOC = JSON.stringify({ type: "doc", content: [] });
+const EMPTY_DOC = JSON.stringify({ type: 'doc', content: [] });
 
 export async function createNote(
   userId: string,
@@ -21,7 +21,7 @@ export async function createNote(
   const note: Note = {
     id: crypto.randomUUID(),
     userId,
-    title: title || "Untitled note",
+    title: title || 'Untitled note',
     contentJson: contentJson ?? EMPTY_DOC,
     isPublic: false,
     publicSlug: null,
@@ -38,7 +38,7 @@ export async function createNote(
   return note;
 }
 
-export type NoteSummary = Pick<Note, "id" | "title" | "isPublic" | "updatedAt">;
+export type NoteSummary = Pick<Note, 'id' | 'title' | 'isPublic' | 'updatedAt'>;
 
 type NoteSummaryRow = {
   id: string;

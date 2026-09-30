@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import ErrorMessage from "./_components/error-message";
+import ErrorMessage from './_components/error-message';
 
 type ErrorPageProps = {
   error: Error & { digest?: string };
@@ -12,8 +12,8 @@ type ErrorPageProps = {
 export default function ErrorPage({ error, reset }: ErrorPageProps) {
   return (
     <ErrorMessage
-      title="Something went wrong"
-      description="We hit an unexpected problem loading this page. Please try again — if it keeps happening, come back in a few minutes."
+      title='Something went wrong'
+      description='We hit an unexpected problem loading this page. Please try again — if it keeps happening, come back in a few minutes.'
       digest={error.digest}
       onRetry={reset}
     />

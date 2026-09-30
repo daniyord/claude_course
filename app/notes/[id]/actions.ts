@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { revalidatePath } from "next/cache";
-import { notFound, redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth";
-import { noteInputSchema } from "@/lib/note-schema";
-import { deleteNote, updateNote } from "@/lib/notes";
+import { revalidatePath } from 'next/cache';
+import { notFound, redirect } from 'next/navigation';
+import { requireUser } from '@/lib/auth';
+import { noteInputSchema } from '@/lib/note-schema';
+import { deleteNote, updateNote } from '@/lib/notes';
 
 export type EditNoteState = { error: string | null };
 
@@ -18,8 +18,8 @@ export async function updateNoteAction(
   const user = await requireUser();
 
   const parsed = noteInputSchema.safeParse({
-    title: formData.get("title") ?? "",
-    content: formData.get("content") ?? "",
+    title: formData.get('title') ?? '',
+    content: formData.get('content') ?? '',
   });
 
   if (!parsed.success) {
@@ -33,12 +33,12 @@ export async function updateNoteAction(
       contentJson: JSON.stringify(parsed.data.content),
     });
   } catch (error) {
-    console.error("Failed to update note", { userId: user.id, noteId, error });
+    console.error('Failed to update note', { userId: user.id, noteId, error });
     return { error: GENERIC_SAVE_ERROR };
   }
   if (!updated) notFound();
 
-  revalidatePath("/dashboard");
+  revalidatePath('/dashboard');
   revalidatePath(`/notes/${noteId}`);
   redirect(`/notes/${noteId}`);
 }
@@ -46,6 +46,6 @@ export async function updateNoteAction(
 export async function deleteNoteAction(noteId: string): Promise<void> {
   const user = await requireUser();
   await deleteNote(user.id, noteId);
-  revalidatePath("/dashboard");
-  redirect("/dashboard");
+  revalidatePath('/dashboard');
+  redirect('/dashboard');
 }
