@@ -6,7 +6,11 @@ import type { JSONContent } from '@tiptap/react';
 import NoteEditor from '@/app/_components/note-editor';
 import { createNoteAction, type NewNoteState } from '../actions';
 
-const initialState: NewNoteState = { error: null };
+// React resets uncontrolled inputs after a form action, so the submitted
+// values are kept in state and fed back as defaults when saving fails.
+type NewNoteFormState = NewNoteState & { title?: string; isPublic?: boolean };
+
+const initialState: NewNoteFormState = { error: null };
 
 export default function NewNoteForm() {
   // The document never affects rendering, so it lives in a ref rather than
@@ -14,9 +18,14 @@ export default function NewNoteForm() {
   const contentRef = useRef<JSONContent | null>(null);
 
   const [state, formAction, isPending] = useActionState(
-    (prevState: NewNoteState, formData: FormData) => {
+    async (prevState: NewNoteFormState, formData: FormData): Promise<NewNoteFormState> => {
       formData.set('content', JSON.stringify(contentRef.current ?? { type: 'doc' }));
-      return createNoteAction(prevState, formData);
+      const result = await createNoteAction(prevState, formData);
+      return {
+        ...result,
+        title: String(formData.get('title') ?? ''),
+        isPublic: formData.get('isPublic') === 'on',
+      };
     },
     initialState,
   );
@@ -28,10 +37,10 @@ export default function NewNoteForm() {
         <input
           type='text'
           name='title'
-          required
           maxLength={200}
           autoFocus
           placeholder='Untitled note'
+          defaultValue={state.title}
           className='rounded-md border border-foreground/20 bg-background px-3 py-2 text-base font-normal focus-visible:border-foreground/50 focus-visible:outline-none'
         />
       </label>
@@ -49,7 +58,12 @@ export default function NewNoteForm() {
       </div>
 
       <label className='flex items-center gap-2 text-sm font-medium'>
-        <input type='checkbox' name='isPublic' className='size-4' />
+        <input
+          type='checkbox'
+          name='isPublic'
+          defaultChecked={state.isPublic}
+          className='size-4'
+        />
         Share publicly (anyone with the link can view)
       </label>
 

@@ -6,7 +6,9 @@ import { authClient } from '@/lib/auth-client';
 
 type AuthMode = 'login' | 'register';
 
-type AuthFormState = { error: string | null };
+// Submitted values are echoed back because React resets uncontrolled inputs
+// after a form action; they become the new defaultValues on error.
+type AuthFormState = { error: string | null; name?: string; email?: string };
 
 type AuthFormProps = {
   mode: AuthMode;
@@ -45,24 +47,25 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
 
   async function submitAuth(_prevState: AuthFormState, formData: FormData): Promise<AuthFormState> {
+    const name = String(formData.get('name') ?? '');
     const email = String(formData.get('email'));
     const password = String(formData.get('password'));
 
     try {
       const { error } =
         mode === 'register'
-          ? await authClient.signUp.email({
-              name: String(formData.get('name')),
-              email,
-              password,
-            })
+          ? await authClient.signUp.email({ name, email, password })
           : await authClient.signIn.email({ email, password });
 
       if (error) {
-        return { error: toFriendlyAuthError(error, mode) };
+        return { error: toFriendlyAuthError(error, mode), name, email };
       }
     } catch {
-      return { error: "We couldn't reach the server. Check your connection and try again." };
+      return {
+        error: "We couldn't reach the server. Check your connection and try again.",
+        name,
+        email,
+      };
     }
 
     router.push('/dashboard');
@@ -91,6 +94,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             required
             maxLength={100}
             autoComplete='name'
+            defaultValue={state.name}
             className='rounded-md border border-foreground/20 bg-background px-3 py-2'
           />
         </label>
@@ -101,6 +105,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
           type='email'
           name='email'
           required
+          autoComplete='email'
+          defaultValue={state.email}
           className='rounded-md border border-foreground/20 bg-background px-3 py-2'
         />
       </label>
@@ -111,6 +117,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           name='password'
           required
           minLength={8}
+          autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
           className='rounded-md border border-foreground/20 bg-background px-3 py-2'
         />
       </label>

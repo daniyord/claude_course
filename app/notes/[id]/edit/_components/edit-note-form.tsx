@@ -13,15 +13,24 @@ type EditNoteFormProps = {
   isPublic: boolean;
 };
 
-const initialState: EditNoteState = { error: null };
+// React resets uncontrolled inputs after a form action, so the submitted
+// values are kept in state and fed back as defaults when saving fails.
+type EditNoteFormState = EditNoteState & { title?: string; isPublic?: boolean };
+
+const initialState: EditNoteFormState = { error: null };
 
 export default function EditNoteForm({ noteId, title, content, isPublic }: EditNoteFormProps) {
   const contentRef = useRef<JSONContent>(content);
 
   const [state, formAction, isPending] = useActionState(
-    (prevState: EditNoteState, formData: FormData) => {
+    async (prevState: EditNoteFormState, formData: FormData): Promise<EditNoteFormState> => {
       formData.set('content', JSON.stringify(contentRef.current));
-      return updateNoteAction(noteId, prevState, formData);
+      const result = await updateNoteAction(noteId, prevState, formData);
+      return {
+        ...result,
+        title: String(formData.get('title') ?? ''),
+        isPublic: formData.get('isPublic') === 'on',
+      };
     },
     initialState,
   );
@@ -33,9 +42,9 @@ export default function EditNoteForm({ noteId, title, content, isPublic }: EditN
         <input
           type='text'
           name='title'
-          required
+          placeholder='Untitled note'
           maxLength={200}
-          defaultValue={title}
+          defaultValue={state.title ?? title}
           className='rounded-md border border-foreground/20 bg-background px-3 py-2 text-base font-normal focus-visible:border-foreground/50 focus-visible:outline-none'
         />
       </label>
@@ -54,7 +63,7 @@ export default function EditNoteForm({ noteId, title, content, isPublic }: EditN
       </div>
 
       <label className='flex items-center gap-2 text-sm font-medium'>
-        <input type='checkbox' name='isPublic' defaultChecked={isPublic} className='size-4' />
+        <input type='checkbox' name='isPublic' defaultChecked={state.isPublic ?? isPublic} className='size-4' />
         Share publicly (anyone with the link can view)
       </label>
 

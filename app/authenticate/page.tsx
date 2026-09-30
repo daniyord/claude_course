@@ -1,4 +1,6 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/auth';
 import AuthForm from './_components/auth-form';
 
 type AuthenticatePageProps = {
@@ -6,6 +8,10 @@ type AuthenticatePageProps = {
 };
 
 export default async function AuthenticatePage({ searchParams }: AuthenticatePageProps) {
+  if (await getCurrentUser()) {
+    redirect('/dashboard');
+  }
+
   const { mode: rawMode } = await searchParams;
   const mode = rawMode === 'register' ? 'register' : 'login';
 
